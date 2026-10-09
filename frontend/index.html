@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EcoPulse - Real-Time Environmental Awareness & Community Monitoring</title>
+  
+  <!-- Inter Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- Leaflet CSS for Map -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+  
+  <!-- App Stylesheet -->
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- Top System Status Bar -->
+  <div class="top-system-bar">
+    <div id="backendStatusBadge" class="backend-badge online">
+      <span class="status-dot green"></span> Checking backend status...
+    </div>
+    <div style="display: flex; gap: 14px; align-items: center;">
+      <span class="purpose-badge" data-i18n="purposeBadge">🌍 Made for Everyone: Kids, Families, Elders & Communities</span>
+      <span id="roleIndicator" style="font-weight: 700; color: #6ee7b7;">👤 Citizen Mode</span>
+    </div>
+  </div>
+
+  <!-- Main Header -->
+  <header class="main-header">
+    <div class="header-container">
+      <div class="logo-area" onclick="navigateToSection('home')">
+        <div class="logo-icon">🌱</div>
+        <div>
+          <div class="logo-title" data-i18n="appName">EcoPulse</div>
+          <div class="logo-tagline" data-i18n="tagline">Monitor. Understand. Act. Together for a Greener Future.</div>
+        </div>
+      </div>
+
+      <div class="header-controls">
+        <!-- Purpose Explainer Button -->
+        <button class="selector-pill btn-purpose" onclick="openModal('purposeModal')" data-i18n="whyEcoPulseBtn">
+          ℹ️ Why EcoPulse? Read Our Purpose
+        </button>
+
+        <!-- View Mode: Standard vs Kid & Elder Friendly -->
+        <button id="viewModeToggleBtn" class="selector-pill btn-mode-toggle" onclick="toggleViewMode()" data-i18n="modeSimple">
+          🧒 Elder & Kid View (Simple & Easy)
+        </button>
+
+        <!-- Multi-Language Selector -->
+        <select id="langSelector" class="selector-pill" onchange="setLanguage(this.value)">
+          <option value="en">English (English)</option>
+          <option value="hi">हिंदी (Hindi)</option>
+          <option value="te">తెలుగు (Telugu)</option>
+          <option value="es">Español (Spanish)</option>
+          <option value="fr">Français (French)</option>
+          <option value="de">Deutsch (German)</option>
+        </select>
+
+        <!-- Role Quick Switcher -->
+        <button class="selector-pill" onclick="toggleUserRole()">
+          <span id="roleToggleText">⚙️ Switch to Admin</span>
+        </button>
+
+        <!-- User Profile & Auth Pill -->
+        <button id="userHeaderBtn" class="selector-pill" onclick="openModal('profileModal')" style="font-weight: 700; color: #047857; background: #ecfdf5; border-color: #a7f3d0;">
+          <span id="userHeaderName">👤 Sign In / Profile</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Navigation Bar -->
+    <nav class="sub-nav">
+      <ul>
+        <li><button class="active" onclick="navigateToSection('home')" data-i18n="navHome">Home</button></li>
+        <li><button onclick="navigateToSection('live-env')" data-i18n="navLiveEnv">Live Air & Weather</button></li>
+        <li><button onclick="navigateToSection('nearby-sec')" data-i18n="navNearby">Nearby Pollution</button></li>
+        <li><button onclick="navigateToSection('traffic-sec')" data-i18n="navTraffic">Traffic & Pollution</button></li>
+        <li><button onclick="navigateToSection('food-sec')" data-i18n="navFood">Food Waste</button></li>
+        <li><button onclick="navigateToSection('water-sec')" data-i18n="navWater">Water Waste</button></li>
+        <li><button onclick="navigateToSection('map-sec')">🗺️ Interactive Map</button></li>
+        <li><button onclick="navigateToSection('community-sec')" data-i18n="navCommunity">Community</button></li>
+        <li><button onclick="navigateToSection('impact-sec')" data-i18n="navImpact">My Eco Impact</button></li>
+        <li><button onclick="navigateToSection('tips-sec')" data-i18n="navTips">Eco Tips</button></li>
+        <li><button onclick="navigateToSection('reports-sec')" data-i18n="navReports">All Reports</button></li>
+        <li><button onclick="openModal('profileModal')">👤 Profile</button></li>
+        <li id="adminNavTab" style="display: none;"><button onclick="navigateToSection('admin-sec')" data-i18n="navAdmin" style="color: #b91c1c;">Admin Portal</button></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- Main Container -->
+  <main class="main-content">
+
+    <!-- Purpose Explainer Banner (Built for all age groups to immediately understand) -->
+    <section class="purpose-hero-banner">
+      <div class="purpose-hero-content">
+        <h2 data-i18n="purposeTitle">What is EcoPulse and Why Does It Exist?</h2>
+        <p class="lead" data-i18n="purposeSubtitle">
+          A friendly community platform to protect the air we breathe, the water we drink, and the food we share.
+        </p>
+
+        <div class="purpose-pillars-grid">
+          <div class="pillar-box">
+            <h4 data-i18n="purposePillar1Title">1. Know Your Air & Weather</h4>
+            <p data-i18n="purposePillar1Desc">Instantly check if it's safe to play outdoors, go for a morning walk, or if you should wear a mask.</p>
+          </div>
+          <div class="pillar-box">
+            <h4 data-i18n="purposePillar2Title">2. Stop Waste in Your Neighborhood</h4>
+            <p data-i18n="purposePillar2Desc">Spot a leaking tap, overflowing tank, or extra food after an event? Report it in 10 seconds so help arrives.</p>
+          </div>
+          <div class="pillar-box">
+            <h4 data-i18n="purposePillar3Title">3. Build Greener Habits Together</h4>
+            <p data-i18n="purposePillar3Desc">Track your personal eco points and help your apartment, school, or office become the greenest community.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Location Bar & Search -->
+    <section class="location-bar-card">
+      <div class="location-current-display">
+        <span class="loc-pin-icon">📍</span>
+        <div>
+          <strong id="displayCurrentLocation" style="font-size: 1.15rem;">Locating your area...</strong>
+          <div id="displayDataSource" style="font-size: 0.8rem; color: var(--text-muted);">
+            Open-Meteo Environmental Network
+          </div>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+        <button class="btn btn-secondary" onclick="detectUserLocation()" data-i18n="useMyLocation">
+          📍 Use My GPS Location
+        </button>
+
+        <form class="location-search-form" onsubmit="handleCitySearch(event)">
+          <input 
+            type="text" 
+            id="citySearchInput" 
+            class="location-search-input" 
+            placeholder="Search city (e.g., Delhi, Mumbai, London...)"
+            data-i18n="searchCityPlaceholder"
+          />
+          <button type="submit" class="btn btn-primary" data-i18n="searchBtn">Search</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- Kid and Elder Friendly Simple Mode View (Visible when mode-simple is active) -->
+    <section class="simple-mode-card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h2>🧒 Simple Visual Guide (For Kids, Seniors & Families)</h2>
+        <button id="readAloudBtnSimple" class="btn btn-voice" onclick="triggerReadAloud()">
+          🔊 Listen to Today's Summary
+        </button>
+      </div>
+
+      <div class="simple-hero-grid">
+        <div class="simple-box">
+          <h3 data-i18n="simpleKidTipTitle">Kid-Friendly Explorer Note</h3>
+          <div id="kidEmojiBadge" style="font-size: 3rem; margin: 8px 0;">😊</div>
+          <p id="kidExplanationText" data-i18n="simpleKidExplanation">
+            PM2.5 are tiny dust specks smaller than a hair! When the smiley is green 😊, it is super safe to play football outside!
+          </p>
+        </div>
+
+        <div class="simple-box" style="background: #fefce8; border-color: #fef08a;">
+          <h3 data-i18n="simpleElderTipTitle">Grandparent Health Reminder</h3>
+          <div id="elderEmojiBadge" style="font-size: 3rem; margin: 8px 0;">🫁</div>
+          <p id="elderExplanationText" data-i18n="simpleElderExplanation">
+            Air is comfortable today. Morning walks before 8:00 AM are recommended. Stay well hydrated and carry light water.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Top Action CTA Buttons -->
+    <div style="display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap;">
+      <button class="btn btn-danger" onclick="openModal('reportProblemModal')" data-i18n="reportProblemBtn">
+        🚨 Report an Environmental Problem
+      </button>
+      <button class="btn btn-primary" onclick="openModal('foodWasteModal')" data-i18n="logFoodWasteBtn">
+        🍲 Post Surplus / Report Food Waste
+      </button>
+      <button class="btn btn-secondary" onclick="openModal('waterWasteModal')" data-i18n="logWaterWasteBtn">
+        💧 Report Water Leak / Wastage
+      </button>
+      <button id="readAloudBtn" class="btn btn-voice" onclick="triggerReadAloud()" data-i18n="listenBtn">
+        🔊 Listen to Today's Report
+      </button>
+    </div>
+
+    <!-- Active Alerts Banner Container -->
+    <div id="alertsContainer" style="margin-bottom: 20px;"></div>
+
+    <!-- Section: Live Environmental Dashboard Grid -->
+    <div id="live-env" class="dashboard-grid">
+
+      <!-- Column 1: AQI & Pollutant Hero Card -->
+      <div class="card col-span-7 aqi-hero-card">
+        <div class="card-header">
+          <div>
+            <h3 class="card-title" data-i18n="aqiCardTitle">Air Quality Index (AQI)</h3>
+            <span class="card-subtitle" data-i18n="standardUsed">Standard: US EPA Standard (0-500)</span>
+          </div>
+          <span id="aqiLastUpdated" class="card-subtitle">Last updated: Just now</span>
+        </div>
+
+        <div class="aqi-main-display">
+          <div id="aqiCircle" class="aqi-number-circle aqi-safe">
+            <span id="aqiValue" class="number">--</span>
+            <span class="unit">AQI</span>
+          </div>
+
+          <div class="aqi-status-info">
+            <span id="aqiStatusBadge" class="aqi-status-badge aqi-safe">Safe & Fresh</span>
+            <p id="aqiDescription" style="font-size: 0.95rem; color: var(--text-main);">
+              Air quality is considered satisfactory, and air pollution poses little or no risk.
+            </p>
+          </div>
+        </div>
+
+        <!-- Health Advisory Box -->
+        <div id="healthAdvisoryBox" class="health-advisory-box">
+          <strong>🩺 Health Advisory:</strong>
+          <span id="healthAdvisoryText">Ideal conditions for outdoor walks and sports for all age groups.</span>
+        </div>
+
+        <!-- Weather Mini Row -->
+        <div style="display: flex; gap: 24px; margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--border);">
+          <div>
+            <span style="font-size: 0.85rem; color: var(--text-muted);" data-i18n="temperature">Temperature</span>
+            <div id="valTemperature" style="font-size: 1.3rem; font-weight: 700;">-- °C</div>
+          </div>
+          <div>
+            <span style="font-size: 0.85rem; color: var(--text-muted);" data-i18n="humidity">Humidity</span>
+            <div id="valHumidity" style="font-size: 1.3rem; font-weight: 700;">-- %</div>
+          </div>
+          <div>
+            <span style="font-size: 0.85rem; color: var(--text-muted);">Data Reliability</span>
+            <div id="valLiveFlag" style="font-size: 1.1rem; font-weight: 700; color: var(--primary-dark);">Live API</div>
+          </div>
+        </div>
+
+        <!-- Pollutant Breakdown Grid -->
+        <div class="pollutant-grid">
+          <div class="pollutant-chip">
+            <div class="label">PM2.5</div>
+            <div id="valPM25" class="val">--</div>
+            <div style="font-size: 0.65rem; color: var(--text-muted);">µg/m³</div>
+          </div>
+          <div class="pollutant-chip">
+            <div class="label">PM10</div>
+            <div id="valPM10" class="val">--</div>
+            <div style="font-size: 0.65rem; color: var(--text-muted);">µg/m³</div>
+          </div>
+          <div class="pollutant-chip">
+            <div class="label">CO</div>
+            <div id="valCO" class="val">--</div>
+            <div style="font-size: 0.65rem; color: var(--text-muted);">mg/m³</div>
+          </div>
+          <div class="pollutant-chip">
+            <div class="label">NO2</div>
+            <div id="valNO2" class="val">--</div>
+            <div style="font-size: 0.65rem; color: var(--text-muted);">µg/m³</div>
+          </div>
+          <div class="pollutant-chip">
+            <div class="label">SO2</div>
+            <div id="valSO2" class="val">--</div>
+            <div style="font-size: 0.65rem; color: var(--text-muted);">µg/m³</div>
+          </div>
+          <div class="pollutant-chip">
+            <div class="label">Ozone (O3)</div>
+            <div id="valO3" class="val">--</div>
+            <div style="font-size: 0.65rem; color: var(--text-muted);">µg/m³</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Column 2: EcoPulse Score Card -->
+      <div class="card col-span-5">
+        <div class="card-header">
+          <div>
+            <h3 class="card-title" data-i18n="ecoScoreTitle">EcoPulse Score</h3>
+            <span class="card-subtitle" data-i18n="ecoScoreDesc">Overall Environmental Health (0-100)</span>
+          </div>
+        </div>
+
+        <div class="score-circle-container">
+          <div id="ecoScoreCircle" class="score-badge-large">--</div>
+          <div>
+            <h4 id="ecoScoreStatus" style="font-size: 1.2rem; color: #065f46;">Healthy & Thriving</h4>
+            <p id="ecoScoreExplanation" style="font-size: 0.88rem; color: var(--text-muted);">
+              Composite metric balancing local air, traffic, water leaks, and food recovery.
+            </p>
+          </div>
+        </div>
+
+        <!-- Factor Bars -->
+        <div class="factor-progress-item">
+          <div class="factor-header">
+            <span>Air Quality Factor (35%)</span>
+            <span id="scoreFactorAir">--/100</span>
+          </div>
+          <div class="progress-bar-bg"><div id="barFactorAir" class="progress-bar-fill" style="width: 0%;"></div></div>
+        </div>
+
+        <div class="factor-progress-item">
+          <div class="factor-header">
+            <span>Traffic Flow Factor (25%)</span>
+            <span id="scoreFactorTraffic">--/100</span>
+          </div>
+          <div class="progress-bar-bg"><div id="barFactorTraffic" class="progress-bar-fill" style="width: 0%; background: #3b82f6;"></div></div>
+        </div>
+
+        <div class="factor-progress-item">
+          <div class="factor-header">
+            <span>Water Waste Control (20%)</span>
+            <span id="scoreFactorWater">--/100</span>
+          </div>
+          <div class="progress-bar-bg"><div id="barFactorWater" class="progress-bar-fill" style="width: 0%; background: #06b6d4;"></div></div>
+        </div>
+
+        <div class="factor-progress-item">
+          <div class="factor-header">
+            <span>Food Waste Mitigation (20%)</span>
+            <span id="scoreFactorFood">--/100</span>
+          </div>
+          <div class="progress-bar-bg"><div id="barFactorFood" class="progress-bar-fill" style="width: 0%; background: #f59e0b;"></div></div>
+        </div>
+
+        <!-- Transparent Formula Callout -->
+        <div class="transparent-formula-callout">
+          <strong data-i18n="transparentFormulaTitle">How is this score calculated? (Transparent Backend Formula)</strong>
+          <p id="formulaDisplay" style="margin-top: 4px;">
+            EcoPulse Score = (Air Quality × 35%) + (Traffic Flow × 25%) + (Water Waste Control × 20%) + (Food Waste Control × 20%)
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section: Traffic & Nearby Comparison Grid -->
+    <div class="dashboard-grid">
+
+      <!-- Traffic Card -->
+      <div id="traffic-sec" class="card col-span-6">
+        <div class="card-header">
+          <h3 class="card-title" data-i18n="trafficTitle">Traffic & Pollution Risk</h3>
+          <span id="trafficSourceBadge" class="backend-badge standalone" style="font-size: 0.75rem;">Urban Mobility Model</span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px;">
+          <div class="pollutant-chip">
+            <div class="label" data-i18n="congestionLevel">Congestion Level</div>
+            <div id="trafficCongestion" class="val" style="color: #f59e0b;">MODERATE</div>
+          </div>
+          <div class="pollutant-chip">
+            <div class="label" data-i18n="trafficIntensity">Traffic Intensity</div>
+            <div id="trafficIntensityVal" class="val">54%</div>
+          </div>
+          <div class="pollutant-chip">
+            <div class="label" data-i18n="trafficPollutionRisk">Pollution Impact</div>
+            <div id="trafficRiskVal" class="val" style="color: #ea580c;">Moderate Risk</div>
+          </div>
+        </div>
+
+        <div class="health-advisory-box" style="border-left-color: #3b82f6;">
+          <strong>🚗 Commuter Environmental Advisory:</strong>
+          <p id="trafficAdviceText" style="margin-top: 4px; font-size: 0.9rem;">
+            Moderate vehicular movement detected. Walking or using the metro for trips under 3 km cuts local NO2 significantly.
+          </p>
+        </div>
+      </div>
+
+      <!-- Nearby Areas Comparison -->
+      <div id="nearby-sec" class="card col-span-6">
+        <div class="card-header">
+          <h3 class="card-title">Pollution Around You (Nearby Areas)</h3>
+          <span class="card-subtitle">Real-Time Sensor Comparison</span>
+        </div>
+
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px;">
+          Compare air quality with adjacent municipal sectors to plan outdoor family activities:
+        </p>
+
+        <div id="nearbyListContainer" class="nearby-list">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Section: Resource Waste Modules (Food & Water) -->
+    <div class="dashboard-grid">
+
+      <!-- Food Waste Module -->
+      <div id="food-sec" class="card col-span-6">
+        <div class="card-header">
+          <div>
+            <h3 class="card-title" data-i18n="foodWasteSummaryTitle">Food Waste Sharing & Reduction</h3>
+            <span class="card-subtitle" data-i18n="foodWasteSub">Surplus meals saved & available for community donation</span>
+          </div>
+          <button class="btn btn-primary" style="padding: 6px 12px; font-size: 0.85rem;" onclick="openModal('foodWasteModal')">
+            + Post Surplus Food
+          </button>
+        </div>
+
+        <div id="foodWasteList" style="display: flex; flex-direction: column; gap: 12px;">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- Water Waste Module -->
+      <div id="water-sec" class="card col-span-6">
+        <div class="card-header">
+          <div>
+            <h3 class="card-title" data-i18n="waterWasteSummaryTitle">Water Waste & Leakage Tracking</h3>
+            <span class="card-subtitle" data-i18n="waterWasteSub">Active leaks reported by citizens to prevent clean water loss</span>
+          </div>
+          <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.85rem;" onclick="openModal('waterWasteModal')">
+            + Report Leak
+          </button>
+        </div>
+
+        <div id="waterWasteList" style="display: flex; flex-direction: column; gap: 12px;">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Section: Interactive Map View -->
+    <section id="map-sec" class="card" style="margin-bottom: 24px;">
+      <div class="card-header">
+        <div>
+          <h3 class="card-title">🗺️ Interactive Environmental Map</h3>
+          <span class="card-subtitle">View your location, water leaks, food sharing pins & pollution hotspots</span>
+        </div>
+
+        <div class="map-filters-bar">
+          <button class="map-filter-btn active" onclick="filterMap('ALL')">All Pins</button>
+          <button class="map-filter-btn" onclick="filterMap('water')">💧 Water Leaks</button>
+          <button class="map-filter-btn" onclick="filterMap('food')">🍲 Surplus Food</button>
+          <button class="map-filter-btn" onclick="filterMap('garbage')">🗑️ Waste Dumps</button>
+          <button class="map-filter-btn" onclick="filterMap('pollution')">⚠️ Smog Zones</button>
+        </div>
+      </div>
+
+      <div id="ecoMapContainer"></div>
+    </section>
+
+    <!-- Section: Community / Society Dashboard & Personal Eco Impact -->
+    <div class="dashboard-grid">
+
+      <!-- Community / Society Dashboard -->
+      <div id="community-sec" class="card col-span-6">
+        <div class="card-header">
+          <div>
+            <h3 class="card-title" data-i18n="navCommunity">Community & Society Dashboard</h3>
+            <span id="communityName" class="card-subtitle">Green Valley Residency Society</span>
+          </div>
+          <span class="backend-badge online" style="background: #d1fae5; color: #065f46;">Verified Society</span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-bottom: 16px;">
+          <div class="pollutant-chip" style="text-align: left; padding: 14px;">
+            <div class="label">💧 Clean Water Wastage Reduced</div>
+            <div id="commWaterReduction" class="val" style="color: #0284c7; font-size: 1.5rem;">18.5%</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">Versus previous month</div>
+          </div>
+          <div class="pollutant-chip" style="text-align: left; padding: 14px;">
+            <div class="label">🍲 Surplus Food Rescued</div>
+            <div id="commFoodSaved" class="val" style="color: #d97706; font-size: 1.5rem;">165 kg</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">Distributed to local shelters</div>
+          </div>
+          <div class="pollutant-chip" style="text-align: left; padding: 14px;">
+            <div class="label">📋 Environmental Reports</div>
+            <div id="commTotalReports" class="val" style="font-size: 1.5rem;">28</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);"><span id="commResolvedReports">23</span> Resolved (82.1%)</div>
+          </div>
+          <div class="pollutant-chip" style="text-align: left; padding: 14px;">
+            <div class="label">🏆 Society Eco Score</div>
+            <div id="commEcoScore" class="val" style="color: #10b981; font-size: 1.5rem;">82 / 100</div>
+            <div style="font-size: 0.75rem; color: var(--text-muted);">Ranked in Top 5% of City</div>
+          </div>
+        </div>
+
+        <div class="health-advisory-box" style="border-left-color: #10b981;">
+          <strong>📢 Society Warden Note:</strong>
+          <p id="commHighlightMsg" style="font-size: 0.9rem; margin-top: 4px;">
+            "This month our community reduced reported clean water wastage by 18.5% and rescued 165 kg of surplus food!"
+          </p>
+        </div>
+      </div>
+
+      <!-- Personal Eco Impact Tracker -->
+      <div id="impact-sec" class="card col-span-6">
+        <div class="card-header">
+          <div>
+            <h3 class="card-title" data-i18n="navImpact">My Personal Eco Impact</h3>
+            <span class="card-subtitle">Your real-world positive environmental footprint</span>
+          </div>
+          <span id="userImpactBadge" class="status-badge" style="background: #fef08a; color: #854d0e; font-size: 0.9rem;">
+            🌿 Eco Guardian
+          </span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px;">
+          <div class="pollutant-chip">
+            <div class="label">Water Saved</div>
+            <div id="impactWater" class="val" style="color: #0284c7;">140 L</div>
+          </div>
+          <div class="pollutant-chip">
+            <div class="label">Food Saved</div>
+            <div id="impactFood" class="val" style="color: #d97706;">9.5 kg</div>
+          </div>
+          <div class="pollutant-chip">
+            <div class="label">Plastic Avoided</div>
+            <div id="impactPlastic" class="val" style="color: #10b981;">32 Items</div>
+          </div>
+          <div class="pollutant-chip">
+            <div class="label">Transit Trips</div>
+            <div id="impactTransit" class="val">11</div>
+          </div>
+          <div class="pollutant-chip">
+            <div class="label">Recycling Logs</div>
+            <div id="impactRecycling" class="val">7</div>
+          </div>
+          <div class="pollutant-chip">
+            <div class="label">Impact Points</div>
+            <div id="impactScore" class="val" style="color: #047857; font-weight: 800;">84 pts</div>
+          </div>
+        </div>
+
+        <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 12px; margin-bottom: 14px; font-size: 0.88rem; color: #166534;">
+          <strong>🎯 Next Goal:</strong> Save 10 more litres of tap water or refuse 2 plastic bags to reach <em>Planet Champion</em> tier!
+        </div>
+
+        <button class="btn btn-primary" style="width: 100%;" onclick="openModal('logImpactModal')" data-i18n="logImpactBtn">
+          + Log My Green Action Today
+        </button>
+      </div>
+    </div>
+
+    <!-- Section: Practical Eco Tips (Filterable by Category & Age Group) -->
+    <section id="tips-sec" class="card" style="margin-bottom: 24px;">
+      <div class="card-header">
+        <div>
+          <h3 class="card-title" data-i18n="navTips">Practical Eco Tips for Everyday Life</h3>
+          <span class="card-subtitle">Simple, actionable habits anyone from kids to grandparents can practice</span>
+        </div>
+
+        <!-- Filter bar -->
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <select id="tipCategoryFilter" class="selector-pill" onchange="renderEcoTips()">
+            <option value="ALL">All Categories</option>
+            <option value="SAVE_WATER">Save Water</option>
+            <option value="REDUCE_FOOD_WASTE">Reduce Food Waste</option>
+            <option value="REDUCE_AIR_POLLUTION">Reduce Air Pollution</option>
+            <option value="REDUCE_PLASTIC">Reduce Plastic</option>
+            <option value="ENERGY_SAVING">Energy Saving</option>
+            <option value="SUSTAINABLE_TRANSPORT">Sustainable Transport</option>
+            <option value="RECYCLING">Recycling</option>
+            <option value="COMMUNITY_CLEANLINESS">Community Cleanliness</option>
+          </select>
+
+          <select id="tipAgeFilter" class="selector-pill" onchange="renderEcoTips()">
+            <option value="ALL">All Generations</option>
+            <option value="KIDS">For Kids</option>
+            <option value="ELDERS">For Elders & Seniors</option>
+            <option value="FAMILIES">For Families</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="ecoTipsContainer" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px;">
+        <!-- Populated by JS -->
+      </div>
+    </section>
+
+    <!-- Section: All Environmental Reports (Community Feed) -->
+    <section id="reports-sec" class="card" style="margin-bottom: 24px;">
+      <div class="card-header">
+        <div>
+          <h3 class="card-title" data-i18n="navReports">Community Environmental Problem Reports</h3>
+          <span class="card-subtitle">Citizen reports driving local municipal & society action</span>
+        </div>
+        <button class="btn btn-danger" onclick="openModal('reportProblemModal')">
+          + File a Report
+        </button>
+      </div>
+
+      <div id="reportsFeedContainer" style="display: flex; flex-direction: column; gap: 14px;">
+        <!-- Populated by JS -->
+      </div>
+    </section>
+
+    <!-- Section: Admin Portal (Visible when Admin Mode is toggled) -->
+    <section id="admin-sec" class="card" style="margin-bottom: 24px; display: none; border-color: #f87171;">
+      <div class="card-header">
+        <div>
+          <h3 class="card-title" style="color: #b91c1c;">🛡️ Community Admin & Warden Management Portal</h3>
+          <span class="card-subtitle">Review incoming environmental reports, advance resolution statuses, and broadcast community alerts</span>
+        </div>
+      </div>
+
+      <!-- Admin Analytics Overview Cards -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 20px;">
+        <div class="pollutant-chip" style="text-align: left; padding: 12px; background: #fef2f2; border-color: #fecaca;">
+          <div class="label" style="color: #991b1b;">Total Reports</div>
+          <div id="adminStatTotal" class="val" style="color: #b91c1c; font-size: 1.4rem;">--</div>
+        </div>
+        <div class="pollutant-chip" style="text-align: left; padding: 12px; background: #ecfdf5; border-color: #a7f3d0;">
+          <div class="label" style="color: #065f46;">Resolved</div>
+          <div id="adminStatResolved" class="val" style="color: #059669; font-size: 1.4rem;">--</div>
+        </div>
+        <div class="pollutant-chip" style="text-align: left; padding: 12px; background: #eff6ff; border-color: #bfdbfe;">
+          <div class="label" style="color: #1e40af;">In Progress</div>
+          <div id="adminStatInProgress" class="val" style="color: #2563eb; font-size: 1.4rem;">--</div>
+        </div>
+        <div class="pollutant-chip" style="text-align: left; padding: 12px; background: #f8fafc; border-color: #e2e8f0;">
+          <div class="label" style="color: #475569;">Registered Users</div>
+          <div id="adminStatUsers" class="val" style="color: #334155; font-size: 1.4rem;">--</div>
+        </div>
+      </div>
+
+      <!-- Broadcast Alert Subsection -->
+      <div style="background: #fff7ed; border: 1px solid #fed7aa; border-radius: 10px; padding: 16px; margin-bottom: 20px;">
+        <h4 style="color: #9a3412; margin-bottom: 8px;">📢 Broadcast Emergency Environmental Alert</h4>
+        <form onsubmit="handleAdminBroadcastAlert(event)" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+          <div>
+            <label style="font-size: 0.82rem; font-weight: 600;">Alert Type *</label>
+            <select id="admAlertType" class="form-control" style="padding: 6px 10px;" required>
+              <option value="AIR_QUALITY">Air Quality Alert</option>
+              <option value="TRAFFIC">Traffic & Emissions Alert</option>
+              <option value="WATER_WASTE">Clean Water Wastage Alert</option>
+              <option value="POLLUTION">Pollution Spillage Alert</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size: 0.82rem; font-weight: 600;">Headline / Title *</label>
+            <input type="text" id="admAlertTitle" class="form-control" style="padding: 6px 10px;" placeholder="e.g. Hazardous PM2.5 in Sector 4" required>
+          </div>
+          <div>
+            <label style="font-size: 0.82rem; font-weight: 600;">Affected Location</label>
+            <input type="text" id="admAlertLoc" class="form-control" style="padding: 6px 10px;" placeholder="e.g. Industrial Ring Road">
+          </div>
+          <div style="grid-column: 1 / -1;">
+            <label style="font-size: 0.82rem; font-weight: 600;">Advisory Message *</label>
+            <input type="text" id="admAlertMsg" class="form-control" style="padding: 6px 10px;" placeholder="Provide concise, actionable safety guidance..." required>
+          </div>
+          <div style="grid-column: 1 / -1; display: flex; justify-content: flex-end;">
+            <button type="submit" class="btn btn-danger" style="padding: 8px 16px; font-size: 0.88rem;">🚨 Post Official Alert</button>
+          </div>
+        </form>
+      </div>
+
+      <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 12px;">
+        Citizen Issue Resolution Pipeline: 
+        <strong>REPORTED ➔ UNDER REVIEW ➔ IN PROGRESS ➔ RESOLVED</strong>
+      </p>
+
+      <div id="adminReportsTableContainer" style="overflow-x: auto;">
+        <!-- Populated by JS -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ========================================================
+       MODALS
+       ======================================================== -->
+
+  <!-- Modal 1: Purpose & How It Helps Everyone -->
+  <div id="purposeModal" class="modal-overlay">
+    <div class="modal-box">
+      <button class="modal-close-btn" onclick="closeModal('purposeModal')">✕</button>
+      <h2 data-i18n="purposeTitle" style="color: #065f46; margin-bottom: 8px;">What is EcoPulse and Why Does It Exist?</h2>
+      <p style="color: var(--text-muted); margin-bottom: 20px;" data-i18n="purposeSubtitle">
+        A friendly community platform to protect the air we breathe, the water we drink, and the food we share.
+      </p>
+
+      <div style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px;">
+        <div style="background: #f0fdf4; padding: 16px; border-radius: 10px; border-left: 4px solid #10b981;">
+          <h4 data-i18n="purposePillar1Title">1. Know Your Air & Weather</h4>
+          <p style="font-size: 0.95rem; margin-top: 4px;" data-i18n="purposePillar1Desc">
+            Instantly check if it's safe to play outdoors, go for a morning walk, or if you should wear a mask.
+          </p>
+        </div>
+
+        <div style="background: #eff6ff; padding: 16px; border-radius: 10px; border-left: 4px solid #3b82f6;">
+          <h4 data-i18n="purposePillar2Title">2. Stop Waste in Your Neighborhood</h4>
+          <p style="font-size: 0.95rem; margin-top: 4px;" data-i18n="purposePillar2Desc">
+            Spot a leaking tap, overflowing tank, or extra food after an event? Report it in 10 seconds so help arrives.
+          </p>
+        </div>
+
+        <div style="background: #fefce8; padding: 16px; border-radius: 10px; border-left: 4px solid #f59e0b;">
+          <h4 data-i18n="purposePillar3Title">3. Build Greener Habits Together</h4>
+          <p style="font-size: 0.95rem; margin-top: 4px;" data-i18n="purposePillar3Desc">
+            Track your personal eco points and help your apartment, school, or office become the greenest community.
+          </p>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" style="width: 100%;" onclick="closeModal('purposeModal')" data-i18n="closeBtn">
+        Close & Continue Exploring
+      </button>
+    </div>
+  </div>
+
+  <!-- Modal 2: Report an Environmental Problem -->
+  <div id="reportProblemModal" class="modal-overlay">
+    <div class="modal-box">
+      <button class="modal-close-btn" onclick="closeModal('reportProblemModal')">✕</button>
+      <h3 style="margin-bottom: 6px;">🚨 Report an Environmental Problem</h3>
+      <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 18px;">
+        Notify your neighborhood wardens of garbage dumping, plastic pollution, smoke, or overflowing bins.
+      </p>
+
+      <form onsubmit="handleReportSubmit(event)">
+        <div class="form-group">
+          <label>Category of Problem *</label>
+          <select id="repCategory" class="form-control" required>
+            <option value="GARBAGE_DUMPING">🗑️ Garbage Dumping</option>
+            <option value="PLASTIC_POLLUTION">🥤 Plastic Pollution</option>
+            <option value="SMOKE">💨 Toxic Smoke / Burning</option>
+            <option value="BAD_AIR">🌫️ Severe Bad Air Smell</option>
+            <option value="OVERFLOWING_BINS">📦 Overflowing Garbage Bins</option>
+            <option value="OTHER">⚠️ Other Environmental Concern</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Specific Location / Landmark *</label>
+          <input type="text" id="repLocation" class="form-control" placeholder="e.g. Near Block C playground gate" required>
+        </div>
+
+        <div class="form-group">
+          <label>Severity Level</label>
+          <select id="repSeverity" class="form-control">
+            <option value="LOW">Low (Minor nuisance)</option>
+            <option value="MEDIUM" selected>Medium (Needs timely clearing)</option>
+            <option value="HIGH">High (Obstructing area or foul smell)</option>
+            <option value="CRITICAL">Critical (Immediate hazard / health risk)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Detailed Description *</label>
+          <textarea id="repDescription" class="form-control" rows="3" placeholder="Describe the problem clearly..." required></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Photo URL (Optional)</label>
+          <input type="url" id="repImageUrl" class="form-control" placeholder="https://example.com/photo.jpg">
+        </div>
+
+        <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('reportProblemModal')">Cancel</button>
+          <button type="submit" class="btn btn-danger">Submit Report to Wardens</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 3: Food Waste / Surplus Sharing Form -->
+  <div id="foodWasteModal" class="modal-overlay">
+    <div class="modal-box">
+      <button class="modal-close-btn" onclick="closeModal('foodWasteModal')">✕</button>
+      <h3 style="margin-bottom: 6px;">🍲 Food Waste Mitigation & Surplus Sharing</h3>
+      <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 18px;">
+        Report extra food from marriages, canteens, or homes for quick redistribution to shelters.
+      </p>
+
+      <form onsubmit="handleFoodWasteSubmit(event)">
+        <div class="form-group">
+          <label>Pickup / Event Location *</label>
+          <input type="text" id="foodLocation" class="form-control" placeholder="e.g. Community Club Dining Hall" required>
+        </div>
+
+        <div class="form-group">
+          <label>Type of Food *</label>
+          <select id="foodType" class="form-control" required>
+            <option value="COOKED_MEALS">Cooked Meals / Buffet Leftovers</option>
+            <option value="VEGETABLES_FRUITS">Fresh Vegetables & Fruits</option>
+            <option value="BAKERY">Bakery & Breads</option>
+            <option value="PACKAGED">Packaged Food (Prior to Expiry)</option>
+            <option value="OTHER">Other Food</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Approximate Quantity (Meals / kg) *</label>
+          <input type="text" id="foodQty" class="form-control" placeholder="e.g. 25 fresh meals or 15 kg" required>
+        </div>
+
+        <div class="form-group">
+          <label>Reason for Surplus *</label>
+          <input type="text" id="foodReason" class="form-control" placeholder="e.g. Birthday party catering surplus, cleanly packed" required>
+        </div>
+
+        <div class="form-group">
+          <label>Special Instructions / Storage info</label>
+          <textarea id="foodDesc" class="form-control" rows="2" placeholder="Refrigerated, please bring clean containers..."></textarea>
+        </div>
+
+        <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('foodWasteModal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Publish Food Sharing Alert</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 4: Water Waste / Leakage Report Form -->
+  <div id="waterWasteModal" class="modal-overlay">
+    <div class="modal-box">
+      <button class="modal-close-btn" onclick="closeModal('waterWasteModal')">✕</button>
+      <h3 style="margin-bottom: 6px;">💧 Report Clean Water Leakage or Wastage</h3>
+      <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 18px;">
+        Every drop saved counts! Help maintenance teams fix leaks before gallons are lost.
+      </p>
+
+      <form onsubmit="handleWaterWasteSubmit(event)">
+        <div class="form-group">
+          <label>Location of Leak *</label>
+          <input type="text" id="waterLocation" class="form-control" placeholder="e.g. Tower 3 Ground Floor Main Valve" required>
+        </div>
+
+        <div class="form-group">
+          <label>Waste Type *</label>
+          <select id="waterType" class="form-control" required>
+            <option value="LEAKING_PIPE">Leaking Pipe Connection</option>
+            <option value="OVERFLOWING_TANK">Overflowing Rooftop Tank</option>
+            <option value="OPEN_TAP">Open / Broken Public Tap</option>
+            <option value="PIPE_BURST">Burst Underground Pipe</option>
+            <option value="EXCESSIVE_USAGE">Excessive Hose Washing / Wastage</option>
+            <option value="OTHER">Other Water Wastage</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Severity</label>
+          <select id="waterSeverity" class="form-control">
+            <option value="LOW">Low (Slow drip)</option>
+            <option value="MEDIUM" selected>Medium (Steady stream)</option>
+            <option value="HIGH">High (Water ponding rapidly)</option>
+            <option value="CRITICAL">Critical (Major pipe blowout / flooding)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Description *</label>
+          <textarea id="waterDesc" class="form-control" rows="2" placeholder="Explain details so plumber arrives prepared..." required></textarea>
+        </div>
+
+        <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('waterWasteModal')">Cancel</button>
+          <button type="submit" class="btn btn-secondary" style="background: #0284c7; color: white;">Log Leak & Notify Plumber</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 5: Personal Eco Action Log -->
+  <div id="logImpactModal" class="modal-overlay">
+    <div class="modal-box">
+      <button class="modal-close-btn" onclick="closeModal('logImpactModal')">✕</button>
+      <h3 style="margin-bottom: 6px;">🌱 Log Your Green Action</h3>
+      <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 18px;">
+        Every positive step boosts your personal Eco Impact score and earns community badges!
+      </p>
+
+      <form onsubmit="handlePersonalImpactSubmit(event)">
+        <div class="form-group">
+          <label>Action Performed *</label>
+          <select id="actionType" class="form-control" required>
+            <option value="WATER_SAVED">💧 Saved Tap Water (Closed tap / bucket bath)</option>
+            <option value="FOOD_AVOIDED">🍲 Finished All Leftovers / Avoided Food Waste</option>
+            <option value="PLASTIC_AVOIDED">🛍️ Refused Single-Use Plastic Bags / Used Cloth Bag</option>
+            <option value="PUBLIC_TRANSPORT">🚌 Took Metro, Bus or Cycled Instead of Car</option>
+            <option value="RECYCLING">♻️ Segregated and Recycled Paper/Cardboard/Bottles</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Estimated Quantity / Units *</label>
+          <input type="number" id="actionAmount" class="form-control" min="1" max="100" value="10" required>
+          <small class="muted">Litres for water, kg for food, items for plastic/recycling, trips for transit.</small>
+        </div>
+
+        <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('logImpactModal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Add Points to My Profile</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 6: User Authentication & Profile Portal -->
+  <div id="profileModal" class="modal-overlay">
+    <div class="modal-box" style="max-width: 580px;">
+      <button class="modal-close-btn" onclick="closeModal('profileModal')">✕</button>
+      
+      <!-- Tab Controls -->
+      <div style="display: flex; gap: 8px; border-bottom: 2px solid var(--border); margin-bottom: 20px; padding-bottom: 8px;">
+        <button id="authTabLogin" class="map-filter-btn active" onclick="switchAuthTab('login')">Sign In</button>
+        <button id="authTabRegister" class="map-filter-btn" onclick="switchAuthTab('register')">Create Account</button>
+        <button id="authTabProfile" class="map-filter-btn" onclick="switchAuthTab('profile')">My Profile</button>
+      </div>
+
+      <!-- Tab Content 1: Sign In -->
+      <div id="authPaneLogin">
+        <h3 style="margin-bottom: 6px; color: #065f46;">🔑 Sign In to EcoPulse</h3>
+        <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 16px;">
+          Access your personal sustainability profile, track your filed reports, and manage alerts.
+        </p>
+
+        <form onsubmit="handleUserLogin(event)">
+          <div class="form-group">
+            <label>Username or Email *</label>
+            <input type="text" id="loginUsername" class="form-control" placeholder="e.g. ecouser or admin" required>
+          </div>
+          <div class="form-group">
+            <label>Password *</label>
+            <input type="password" id="loginPassword" class="form-control" placeholder="••••••••" required>
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">Sign In</button>
+        </form>
+
+        <!-- Quick Demo One-Click Sign In -->
+        <div style="margin-top: 20px; padding-top: 16px; border-top: 1px dashed var(--border);">
+          <span style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Quick Demo Accounts:</span>
+          <div style="display: flex; gap: 10px; margin-top: 8px; flex-wrap: wrap;">
+            <button type="button" class="btn btn-secondary" style="font-size: 0.82rem; padding: 6px 12px;" onclick="fillDemoLogin('ecouser', 'ecopulse123')">
+              👤 Demo Citizen (ecouser)
+            </button>
+            <button type="button" class="btn btn-secondary" style="font-size: 0.82rem; padding: 6px 12px;" onclick="fillDemoLogin('admin', 'admin123')">
+              🛡️ Demo Admin (admin)
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab Content 2: Register -->
+      <div id="authPaneRegister" style="display: none;">
+        <h3 style="margin-bottom: 6px; color: #065f46;">🌱 Join the EcoPulse Community</h3>
+        <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 16px;">
+          Create an account to start earning green points and helping your society stay clean.
+        </p>
+
+        <form onsubmit="handleUserRegister(event)">
+          <div class="form-group">
+            <label>Full Name *</label>
+            <input type="text" id="regFullName" class="form-control" placeholder="e.g. Priya Sharma" required>
+          </div>
+          <div class="form-group">
+            <label>Username * (min 3 chars)</label>
+            <input type="text" id="regUsername" class="form-control" placeholder="e.g. priyagreen" minlength="3" required>
+          </div>
+          <div class="form-group">
+            <label>Email Address *</label>
+            <input type="email" id="regEmail" class="form-control" placeholder="e.g. priya@example.com" required>
+          </div>
+          <div class="form-group">
+            <label>Password * (min 6 chars)</label>
+            <input type="password" id="regPassword" class="form-control" placeholder="••••••••" minlength="6" required>
+          </div>
+          <div class="form-group">
+            <label>Affiliated Society / Community</label>
+            <select id="regCommunityId" class="form-control">
+              <option value="1">Green Valley Residency Society</option>
+              <option value="2">Harmony College Campus</option>
+              <option value="3">EcoTech Innovation Park</option>
+              <option value="4">Civic Green Ward 14</option>
+            </select>
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">Create My Account</button>
+        </form>
+      </div>
+
+      <!-- Tab Content 3: My Profile -->
+      <div id="authPaneProfile" style="display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+          <div>
+            <h3 id="profDisplayName" style="margin-bottom: 2px; color: #065f46;">Eco Citizen</h3>
+            <span id="profRoleBadge" class="status-badge" style="background: #d1fae5; color: #065f46;">ROLE_USER</span>
+          </div>
+          <button class="btn btn-secondary" style="font-size: 0.8rem; padding: 6px 12px;" onclick="handleUserLogout()">
+            🚪 Sign Out
+          </button>
+        </div>
+
+        <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: 10px; padding: 14px; margin-bottom: 16px;">
+          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; font-size: 0.88rem;">
+            <div><strong>Username:</strong> <span id="profUsername">ecouser</span></div>
+            <div><strong>Email:</strong> <span id="profEmail">citizen@ecopulse.org</span></div>
+            <div><strong>Community:</strong> <span id="profCommunity">Green Valley Residency</span></div>
+            <div><strong>Token Status:</strong> <span id="profTokenStatus" style="color: #059669; font-weight: 600;">Active</span></div>
+          </div>
+        </div>
+
+        <h4 style="margin-bottom: 8px; font-size: 0.95rem;">📋 My Submitted Reports</h4>
+        <div id="profReportsContainer" style="max-height: 180px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px;">
+          <div style="font-size: 0.85rem; color: var(--text-muted);">Loading your submissions...</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- Leaflet Map JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  
+  <!-- EcoPulse Modular Scripts -->
+  <script src="js/i18n.js"></script>
+  <script src="js/speech.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/map.js"></script>
+  <script src="js/app.js"></script>
+
+</body>
+</html>

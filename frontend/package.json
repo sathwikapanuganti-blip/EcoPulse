@@ -1,0 +1,25 @@
+{
+  "name": "ecopulse-frontend",
+  "version": "1.0.0",
+  "description": "EcoPulse: Real-Time Environmental Awareness and Community Monitoring Dashboard",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx serve -l 3000 .",
+    "dev": "npx serve -l 3000 .",
+    "build": "echo 'EcoPulse frontend is standalone and production-ready static web application.'"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "serve": "^14.2.1"
+  },
+  "keywords": [
+    "environment",
+    "air-quality",
+    "community",
+    "water-waste",
+    "food-waste",
+    "ecopulse"
+  ],
+  "author": "EcoPulse Community",
+  "license": "MIT"
+}
