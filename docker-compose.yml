@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  # 1. MySQL Database Service
+  mysql-db:
+    image: mysql:8.0
+    container_name: ecopulse-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ecopulse_db
+      MYSQL_ROOT_PASSWORD: root_password_ecopulse
+      MYSQL_USER: ecopulse_user
+      MYSQL_PASSWORD: ecopulse_secure_pass
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    networks:
+      - ecopulse-network
+
+  # 2. Spring Boot Backend Service
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ecopulse-backend
+    restart: unless-stopped
+    depends_on:
+      - mysql-db
+    environment:
+      DB_URL: jdbc:mysql://mysql-db:3306/ecopulse_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      DB_USERNAME: ecopulse_user
+      DB_PASSWORD: ecopulse_secure_pass
+      JWT_SECRET: EcoPulseSecretKeyForJwtTokenGenerationSecurityKeyMustBe256BitsLongAtLeast1234567890!
+      AIR_QUALITY_API_KEY: ""
+    ports:
+      - "8080:8080"
+    networks:
+      - ecopulse-network
+
+  # 3. Web Frontend Service
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: ecopulse-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    networks:
+      - ecopulse-network
+
+volumes:
+  mysql-data:
+
+networks:
+  ecopulse-network:
+    driver: bridge
